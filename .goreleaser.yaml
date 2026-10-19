@@ -1,0 +1,83 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/goreleaser/goreleaser/v2.18.3/www/docs/static/schema.json
+version: 2
+
+project_name: starlink-bridge
+
+builds:
+  - id: starlink-bridge
+    dir: bridge
+    main: .
+    binary: starlink-bridge
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+
+archives:
+  - ids:
+      - starlink-bridge
+    formats:
+      - tar.gz
+    files:
+      - LICENSE
+      - README.md
+      - compose.example.yaml
+      - .env.example
+      - docs/nas.md
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+release:
+  github:
+    owner: RCooLeR
+    name: StarlinkBridge
+  prerelease: auto
+  preflight:
+    fail_on_error: true
+
+dockers_v2:
+  - id: dockerhub
+    ids:
+      - starlink-bridge
+    dockerfile: bridge/Dockerfile.goreleaser
+    images:
+      - rcooler/starlink-bridge
+    tags:
+      - "{{ .Version }}"
+      - "{{ if and (not .IsSnapshot) (not .Prerelease) }}{{ .Major }}.{{ .Minor }}{{ end }}"
+      - "{{ if and (not .IsSnapshot) (not .Prerelease) }}{{ .Major }}{{ end }}"
+      - "{{ if and (not .IsSnapshot) (not .Prerelease) }}latest{{ end }}"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      org.opencontainers.image.title: starlink-bridge
+      org.opencontainers.image.description: Read-only Starlink bridge for Prometheus and Home Assistant
+      org.opencontainers.image.licenses: MIT
+      org.opencontainers.image.source: "{{ .GitURL }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.created: "{{ .CommitDate }}"
+    # The local snapshot exporter cannot load attestations on every Docker store.
+    sbom: "{{ not .IsSnapshot }}"
+    flags:
+      - '{{ if .IsSnapshot }}--provenance=false{{ else }}--provenance=mode=max{{ end }}'
+
+docker_digest:
+  name_template: digests.txt
+
+changelog:
+  use: git

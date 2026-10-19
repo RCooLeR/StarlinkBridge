@@ -1,0 +1,23 @@
+services:
+  starlink-bridge:
+    build: ./bridge
+    restart: unless-stopped
+    ports:
+      - "9091:9091"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      STARLINK_MODE: ${STARLINK_MODE:-cloud}
+      STARLINK_DEVICE_ID: ${STARLINK_DEVICE_ID:-}
+      STARLINK_LOCAL_ADDRESS: ${STARLINK_LOCAL_ADDRESS:-192.168.100.1:9200}
+      STARLINK_POLL_INTERVAL: ${STARLINK_POLL_INTERVAL:-60s}
+      STARLINK_COOKIE_FILE: /app/config/starlink.cookie
+      STARLINK_COOKIE_STATE_FILE: /app/data/cookies.json
+      STARLINK_MQTT_ENABLED: ${STARLINK_MQTT_ENABLED:-false}
+      STARLINK_MQTT_BROKER: ${MQTT_BROKER:-tcp://mosquitto:1883}
+      STARLINK_MQTT_USERNAME: ${MQTT_USERNAME:-}
+      STARLINK_MQTT_PASSWORD: ${MQTT_PASSWORD:-}
+    volumes:
+      - ./secrets:/app/config:ro
+      - ./data:/app/data

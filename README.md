@@ -171,7 +171,7 @@ Protocol references: [Starlink schema](https://github.com/Eitol/starlink-client/
 
 ## Releases
 
-The release workflow uses GoReleaser v2.18.3 to publish Linux amd64 and arm64
+The release workflow uses GoReleaser v2.19.0 to publish Linux amd64 and arm64
 archives with SHA-256 checksums and the multi-platform Docker Hub image
 `rcooler/starlink-bridge`. It runs only when a stable `vMAJOR.MINOR.PATCH` tag is
 pushed, and requires that tag to point to the current default branch tip. Branch
